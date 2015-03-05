@@ -1,0 +1,93 @@
+Questionnaire Processing:
+=========================
+
+
+../../sdaps-1.1.5/sdaps.py Run4 setup_tex a4.tex
+../../sdaps-1.1.7/sdaps.py Run8 stamp -f IDS_1.list
+pdfjam Run5/questionnaire.pdf '2,3,4,1' --nup 2x1 --a3paper --landscape --outfile U11_a3.pdf
+acroread print Page-Scaling=none; Landscape; Duplex=Short; Media-Size=A3;  
+
+
+new scripts:
+
+- python src/CreateQuestionaire.py NAME TYP N
+- tar empty ProjectDir !!
+- src/PrintBlock.bash NAME Ntypes I1 I2
+
+Collect filled in questionnaires
+
+create directory for project-scans:
+- mkdir U11_Scans
+
+
+For each batch of approx. 50 questionnaires:
+
+  Scan to USB-Stick   Duplex A3 TIF monochrome 300x300 dpi
+    2pass Simplex is 3 x faster 
+    save to files Scan_iA.tif  Scan_iB.tif for ScanNumber i
+
+  Split/Reorder/Sort back to single-questionnaire multipage A4 TIF:
+  - src/SortScans.py i A B
+
+  Add new scans to SDAPS project:
+  - src/AddScans.py U11
+
+  Run questionnaire recognition:
+  - ./sdaps.py U11_0 recognize
+  - ./sdaps.py U11_1 recognize
+
+
+
+Export all to csv:
+- ./sdaps.py U11_0 csv export --images
+- ./sdaps.py U11_1 csv export --images
+
+
+
+Start GUI for specific QID:
+./sdaps.py U10TS_0 gui -f "questionnaire_id=='3072'"
+
+gui/__init__.py:
+#self._window.maximize()   set other size and location...
+self._window.resize(1000,800)
+self._window.move(1500,0)
+
+
+Problems with light blue pens:
+
+- scan to color/text pdf
+- convert to gray-scale tiff:
+  gs -dNOPAUSE -q -r300 -sDEVICE=tiffgray -dBATCH -sOutputFile=test_gray.tif test_color.pdf
+- convert to monochrome tiff:
+  convert -threshold 80% -monochrome -compress fax test_gray.tif test_mc80_fromPDF.tiff
+
+
+
+
+
+Add Features:
+=============
+
+Hook CorrectChoice handling into gui/buddies.py
+
+do not synch checkbox.state(-1,0,+1) with checkbutton.active (true,false)
+
+try (true,+1)  click (false,0) click (true,-1) auto-toggle-button (false,-1)
+
+
+
+
+
+Hardware:
+=========
+
+Document-Scaners:
+- Canon DR-6030C   (EUR 2600)
+
+
+
+
+
+BUGS:
+=====
+
